@@ -1,13 +1,18 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
   "headers": [
     {
-      "source": "/models/(.*).usdz",
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS" }
+      ]
+    },
+    {
+      "source": "/models/penguin.usdz",
       "headers": [
         { "key": "Content-Type", "value": "model/vnd.usdz+zip" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" }
+        { "key": "Content-Disposition", "value": "attachment; filename=penguin.usdz" }
       ]
     }
   ]

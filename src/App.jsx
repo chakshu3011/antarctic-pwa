@@ -4,25 +4,22 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 const PenguinAR = () => (
   <div style={{ width: '100%', height: '100dvh', background: '#f0f0f0' }}>
     <model-viewer
-      src="/models/penguin.glb"
-      ios-src="https://antarctic-pwa.vercel.app/models/penguin.usdz"
-      alt="A 3D Emperor Penguin"
-      ar
-      // ar-modes="webxr scene-viewer quick-look"
-      ar-modes= "quick-look webxr scene-viewer"
-      camera-controls
-      auto-rotate
-      shadow-intensity="1"
-      style={{ width: '100%', height: '100%' }}
-    >
-      {/* This is the Info button mentioned in your wireframes */}
-      <button 
-        className="absolute bottom-8 right-8 bg-blue-500 text-white p-4 rounded-full shadow-lg"
-        onClick={() => alert("Penguin Info coming soon!")}
-      >
-        Info
-      </button>
-    </model-viewer>
+  src="/models/penguin.glb"
+  ios-src="/models/penguin.usdz"
+  ar
+  ar-modes="quick-look webxr scene-viewer"
+  camera-controls
+  interaction-prompt="auto"
+  style={{ width: '100%', height: '100%' }}
+>
+  <button slot="ar-button" style={{
+    backgroundColor: 'white', borderRadius: '8px', border: 'none', 
+    position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)',
+    padding: '10px 20px', boxShadow: '0 2px 5px rgba(0,0,0,0.3)'
+  }}>
+    👋 Activate AR
+  </button>
+</model-viewer>
   </div>
 );
 
