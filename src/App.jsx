@@ -5,7 +5,7 @@ const PenguinAR = () => (
   <div style={{ width: '100%', height: '100dvh', background: '#f0f0f0' }}>
     <model-viewer
       src="/models/penguin.glb"
-      ios-src="/models/penguin.usdz"
+      ios-src="https://antarctic-pwa.vercel.app/models/penguin.usdz"
       alt="A 3D Emperor Penguin"
       ar
       // ar-modes="webxr scene-viewer quick-look"
