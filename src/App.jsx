@@ -8,7 +8,8 @@ const PenguinAR = () => (
       ios-src="/models/penguin.usdz"
       alt="A 3D Emperor Penguin"
       ar
-      ar-modes="webxr scene-viewer quick-look"
+      // ar-modes="webxr scene-viewer quick-look"
+      ar-modes= "quick-look webxr scene-viewer"
       camera-controls
       auto-rotate
       shadow-intensity="1"
