@@ -15,7 +15,7 @@ const PenguinAR = () => {
         filter: isInfoOpen ? 'blur(10px)' : 'none' 
       }}>
         <model-viewer
-          src="/models/penguin.glb"
+          src="/models/penguin1.glb"
           ios-src="https://antarctic-pwa.vercel.app/models/penguin1.usdz"
           /* Add these two lines */
           autoplay
