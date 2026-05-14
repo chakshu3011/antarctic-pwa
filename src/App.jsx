@@ -63,8 +63,10 @@ const PenguinAR = () => {
             maxWidth: '400px', width: '100%', position: 'relative', color: '#1a1a1a'
           }}>
             <button onClick={() => setIsInfoOpen(false)} style={{
-              position: 'absolute', top: '15px', right: '15px', border: 'none',
-              background: 'none', fontSize: '24px', cursor: 'pointer'
+              position: 'absolute', top: '-15px', right: '-15px', border: '2px solid white', borderRadius: '50%',
+              width: '30px', height: '30px', color: "white", display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: '#1e3a8a', fontSize: '20px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+              zIndex: 60
             }}>✕</button>
 
             <h2 style={{ color: '#1e3a8a', marginBottom: '15px' }}>Emperor Penguins</h2>
