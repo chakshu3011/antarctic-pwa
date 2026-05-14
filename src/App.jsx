@@ -61,3 +61,4 @@ const PenguinAR = () => {
     </div>
   );
 };
+export default App;
