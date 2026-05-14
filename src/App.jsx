@@ -4,7 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 const PenguinAR = () => (
   <div style={{ width: '100%', height: '100dvh', background: '#f0f0f0' }}>
     <model-viewer
-  src="/models/penguin.glb"
+  src="/models/penguin1.glb"
   ios-src="/models/penguin.usdz"
   ar
   ar-modes="quick-look webxr scene-viewer"
