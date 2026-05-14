@@ -8,7 +8,7 @@ const PenguinAR = () => {
     <div className="relative w-full h-[100dvh] overflow-hidden bg-gray-100">
       
       {/* 1. THE BACKGROUND (AR MODEL) */}
-      <div className={w-full h-full transition-all duration-500 ${isInfoOpen ? 'blur-md scale-110' : 'blur-0'}}>
+      <div className={`w-full h-full transition-all duration-500 ${isInfoOpen ? 'blur-md scale-110' : 'blur-0'}`}>
         <model-viewer
           src="/models/penguin.glb"
           ios-src="https://antarctic-pwa.vercel.app/models/penguin1.usdz"
