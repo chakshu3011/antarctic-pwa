@@ -15,13 +15,14 @@ const PenguinAR = () => {
         filter: isInfoOpen ? 'blur(10px)' : 'none' 
       }}>
         <model-viewer
-          src="/models/penguin1.glb"
+          src="/models/penguin.glb"
           ios-src="https://antarctic-pwa.vercel.app/models/penguin1.usdz"
+          /* Add these two lines */
+          autoplay
+          animation-name="idle" 
           ar
           ar-modes="quick-look webxr scene-viewer"
           camera-controls
-          auto-rotate
-          shadow-intensity="1"
           scale="10 10 10"
           style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
         >
