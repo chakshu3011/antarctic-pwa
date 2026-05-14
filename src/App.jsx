@@ -5,63 +5,86 @@ const PenguinAR = () => {
   const [isInfoOpen, setIsInfoOpen] = useState(false);
 
   return (
-  <div className="relative w-full h-[100dvh] overflow-hidden bg-transparent">
-    
-    {/* 1. THE BACKGROUND (AR MODEL) */}
-    {/* Removed bg-gray-100 so the camera feed can show through */}
-    <div className={`w-full h-full transition-all duration-500 ${isInfoOpen ? 'blur-md scale-110' : 'blur-0'}`}>
-      <model-viewer
-        src="/models/penguin1.glb"
-        ios-src="https://antarctic-pwa.vercel.app/models/penguin1.usdz"
-        ar
-        ar-modes="quick-look webxr scene-viewer"
-        camera-controls
-        scale="10 10 10"
-        style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
-      />
-    </div>
-
-    {/* 2. THE INFO BUTTON - Fixed to Bottom Right */}
-    {!isInfoOpen && (
-      <button 
-        onClick={() => setIsInfoOpen(true)}
-        className="absolute bottom-10 right-10 z-20 bg-blue-600 text-white px-6 py-3 rounded-full shadow-2xl font-bold transition-transform active:scale-95"
-      >
-        Info
-      </button>
-    )}
-
-    {/* 3. THE INFORMATION OVERLAY */}
-    {isInfoOpen && (
-      <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-sm">
-        <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative text-gray-900">
-          <button 
-            onClick={() => setIsInfoOpen(false)}
-            className="absolute top-4 right-4 text-gray-400 hover:text-black text-2xl font-bold"
-          >
-            ✕
+    <div style={{ width: '100vw', height: '100dvh', margin: 0, padding: 0, overflow: 'hidden', backgroundColor: 'black' }}>
+      
+      {/* 1. THE AR MODEL */}
+      <div style={{ 
+        width: '100%', 
+        height: '100%', 
+        transition: 'filter 0.5s ease',
+        filter: isInfoOpen ? 'blur(10px)' : 'none' 
+      }}>
+        <model-viewer
+          src="/models/penguin.glb"
+          ios-src="https://antarctic-pwa.vercel.app/models/penguin1.usdz"
+          ar
+          ar-modes="quick-look webxr scene-viewer"
+          camera-controls
+          auto-rotate
+          shadow-intensity="1"
+          scale="10 10 10"
+          style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
+        >
+          {/* Custom AR Button to ensure it shows up */}
+          <button slot="ar-button" style={{
+            position: 'absolute', bottom: '100px', left: '50%', transform: 'translateX(-50%)',
+            padding: '12px 24px', backgroundColor: '#2563eb', color: 'white', 
+            border: 'none', borderRadius: '30px', fontWeight: 'bold', zIndex: 10
+          }}>
+            👋 View in AR
           </button>
+        </model-viewer>
+      </div>
 
-          <h2 className="text-2xl font-bold text-blue-900 mb-4">Emperor Penguins</h2>
-          
-          <div className="space-y-4 leading-relaxed text-left">
-            <p>📍 <strong>The Giant of Ice:</strong> Emperors are the tallest and heaviest species, reaching 1.3m!</p>
-            <p>❄️ <strong>Extreme Survival:</strong> They breed during the harsh Antarctic winter in -60°C winds.</p>
-            <hr className="border-gray-200" />
-            <p className="font-semibold text-blue-800 italic">How to save them:</p>
-            <ul className="list-disc pl-5 space-y-2 text-sm">
-              <li><strong>Protect Sea Ice:</strong> Climate change melts their breeding grounds.</li>
-              <li><strong>Sustainable Fishing:</strong> Overfishing starves penguin colonies.</li>
-            </ul>
+      {/* 2. THE INFO BUTTON */}
+      {!isInfoOpen && (
+        <button 
+          onClick={() => setIsInfoOpen(true)}
+          style={{
+            position: 'absolute', bottom: '30px', right: '30px',
+            padding: '15px 30px', backgroundColor: '#2563eb', color: 'white',
+            border: 'none', borderRadius: '50px', fontWeight: 'bold', fontSize: '18px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.3)', zIndex: 20
+          }}
+        >
+          Info
+        </button>
+      )}
+
+      {/* 3. THE INFO OVERLAY */}
+      {isInfoOpen && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 50,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)', padding: '20px'
+        }}>
+          <div style={{
+            backgroundColor: 'white', padding: '30px', borderRadius: '24px',
+            maxWidth: '400px', width: '100%', position: 'relative', color: '#1a1a1a'
+          }}>
+            <button onClick={() => setIsInfoOpen(false)} style={{
+              position: 'absolute', top: '15px', right: '15px', border: 'none',
+              background: 'none', fontSize: '24px', cursor: 'pointer'
+            }}>✕</button>
+
+            <h2 style={{ color: '#1e3a8a', marginBottom: '15px' }}>Emperor Penguins</h2>
+            <div style={{ textAlign: 'left', lineHeight: '1.6' }}>
+              <p>📍 <strong>The Giant of Ice:</strong> Tallest penguin species, reaching 1.3m!</p>
+              <p>❄️ <strong>Extreme Survival:</strong> They breed in -60°C Antarctic winds.</p>
+              <hr style={{ margin: '15px 0', opacity: 0.2 }} />
+              <p style={{ color: '#1e40af', fontWeight: 'bold' }}>How to save them:</p>
+              <ul style={{ paddingLeft: '20px' }}>
+                <li>Reduce carbon to save sea ice.</li>
+                <li>Choose sustainable seafood.</li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
 };
 
-// THIS WAS THE MISSING PIECE: The App function that uses the Routes
 function App() {
   return (
     <BrowserRouter>
