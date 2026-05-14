@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-/* ... existing imports ... */
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 const PenguinAR = () => {
   const [isInfoOpen, setIsInfoOpen] = useState(false);
@@ -20,7 +20,7 @@ const PenguinAR = () => {
         />
       </div>
 
-      {/* 2. THE INFO BUTTON (Only shows when info is closed) */}
+      {/* 2. THE INFO BUTTON */}
       {!isInfoOpen && (
         <button 
           onClick={() => setIsInfoOpen(true)}
@@ -30,12 +30,10 @@ const PenguinAR = () => {
         </button>
       )}
 
-      {/* 3. THE INFORMATION OVERLAY (The next "screen") */}
+      {/* 3. THE INFORMATION OVERLAY */}
       {isInfoOpen && (
         <div className="absolute inset-0 z-50 flex items-center justify-center p-6 bg-black/30 backdrop-blur-sm">
-          <div className="bg-white/90 rounded-3xl p-8 max-w-md w-full shadow-2xl relative animate-in fade-in zoom-in duration-300">
-            
-            {/* Close Button */}
+          <div className="bg-white/90 rounded-3xl p-8 max-w-md w-full shadow-2xl relative">
             <button 
               onClick={() => setIsInfoOpen(false)}
               className="absolute top-4 right-4 text-gray-500 hover:text-black text-xl"
@@ -45,14 +43,14 @@ const PenguinAR = () => {
 
             <h2 className="text-2xl font-bold text-blue-900 mb-4">Emperor Penguins</h2>
             
-            <div className="space-y-4 text-gray-700 leading-relaxed">
+            <div className="space-y-4 text-gray-700 leading-relaxed text-left">
               <p>📍 <strong>The Giant of Ice:</strong> Emperors are the tallest and heaviest of all living penguin species, reaching up to 1.3 meters!</p>
-              <p>❄️ <strong>Extreme Survival:</strong> They are the only animals to breed during the harsh Antarctic winter, huddling together to stay warm in -60°C winds.</p>
+              <p>❄️ <strong>Extreme Survival:</strong> They are the only animals to breed during the harsh Antarctic winter, huddling together to stay warm.</p>
               <hr className="border-blue-100" />
               <p className="font-semibold text-blue-800">How to save them:</p>
               <ul className="list-disc pl-5 space-y-2 text-sm">
-                <li><strong>Protect Sea Ice:</strong> Climate change melts the ice they need for breeding. Reducing carbon footprints helps keep the ice solid.</li>
-                <li><strong>Sustainable Fishing:</strong> Overfishing of krill and silverfish starves penguin colonies. Look for MSC-certified seafood!</li>
+                <li><strong>Protect Sea Ice:</strong> Climate change melts the ice they need for breeding.</li>
+                <li><strong>Sustainable Fishing:</strong> Overfishing starves penguin colonies.</li>
               </ul>
             </div>
           </div>
@@ -61,4 +59,17 @@ const PenguinAR = () => {
     </div>
   );
 };
+
+// THIS WAS THE MISSING PIECE: The App function that uses the Routes
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<PenguinAR />} />
+        <Route path="/penguin" element={<PenguinAR />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
 export default App;
