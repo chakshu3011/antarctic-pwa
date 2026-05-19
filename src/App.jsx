@@ -16,18 +16,17 @@ const PenguinAR = () => {
   }, [isThankYouOpen]);
 
   const playIcyVoice = (e) => {
-    e.stopPropagation();
+    e.stopPropagation(); // Prevents tapping the button from breaking AR surface tracking
     const audio = new Audio('/audio/icy_voice.mp3'); 
-    audio.play().catch(err => console.log("Audio waiting for user click:", err));
+    audio.play().catch(err => console.log("Audio waiting for user click interaction:", err));
   };
 
   const isBlurred = isInfoOpen || isThankYouOpen;
 
   return (
-    // Hardened Viewport Layer: Forces 100% device height and width coverage
     <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', margin: 0, padding: 0, overflow: 'hidden', backgroundColor: 'black', fontFamily: 'sans-serif' }}>
 
-      {/* 1. THE VIEWPORT BOUNDARY BOX */}
+      {/* 1. MAIN 3D DISPLAY LAYER */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -51,20 +50,16 @@ const PenguinAR = () => {
           style={{ width: '100%', height: '100%', display: 'block', backgroundColor: 'transparent' }}
         >
           
-          {/* THE MASTER AR CAMERA SYSTEM INTERFACE */}
-          {/* These elements are hidden on the web view and only display inside the AR camera stream */}
-          <div slot="ar-button" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100 }}>
+          {/* =========================================================================
+              THE IMMERSIVE AR VIEW CONTAINER
+              Everything inside this single div ONLY shows up when the AR camera launches!
+             ========================================================================= */}
+          <div slot="ar-button" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
             
-            {/* Live Transparent PNG Frame Overlay (AR Mode) */}
-            {activeFrame && (
-              <img 
-                src={activeFrame === 'frame1' ? '/images/frame1.png' : '/images/frame2.png'} 
-                alt="Active Frame Border"
-                style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', inset: 0, pointerEvents: 'none' }}
-              />
-            )}
+            {/* Native AR Camera Trigger Action (Hidden inside the camera view automatically) */}
+            <button id="ar-trigger" style={{ display: 'none' }}></button>
 
-            {/* Top Center Layout: The Audio Track Controller */}
+            {/* Top Center: Audio Track Controller inside AR view */}
             <div style={{ position: 'absolute', top: '40px', left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
               <button
                 onClick={playIcyVoice}
@@ -78,7 +73,7 @@ const PenguinAR = () => {
               </button>
             </div>
 
-            {/* Bottom Row Layout: Interactive Frame Selectors */}
+            {/* Bottom Row: Frame Selector Panels inside AR view */}
             <div style={{ position: 'absolute', bottom: '40px', left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
               <div style={{ display: 'flex', gap: '12px', backgroundColor: 'rgba(0,0,0,0.75)', padding: '12px 20px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.2)' }}>
                 <button 
@@ -106,69 +101,55 @@ const PenguinAR = () => {
 
           </div>
 
-          {/* AR ACTIVATION BUTTON (Native Activation Trigger for regular web layout view) */}
-          <button
-            slot="ar-button"
-            style={{
-              position: 'absolute', 
-              bottom: '120px', 
-              left: '50%', 
-              transform: 'translateX(-50%)',
-              padding: '14px 28px', 
-              backgroundColor: '#2B4BAA', 
-              color: 'white',
-              border: '2px solid white', 
-              borderRadius: '30px', 
-              fontWeight: 'bold', 
-              fontSize: '16px',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.4)', 
-              cursor: 'pointer',
-              zIndex: 10
-            }}
-          >
-            See ICY in AR
-          </button>
-
         </model-viewer>
       </div>
 
-      {/* ACTIVE TRANSPARENT FRAME RENDER ZONE (Only appears on web layer when testing scales) */}
+      {/* ACTIVE TRANSPARENT FRAME OVERLAY (Pinned directly to screen boundaries) */}
       {activeFrame && !isBlurred && (
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 5 }}>
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}>
           <img 
             src={activeFrame === 'frame1' ? '/images/frame1.png' : '/images/frame2.png'} 
-            alt="Active Overlay Frame"
+            alt="Active Live Frame"
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
           />
         </div>
       )}
 
-      {/* 2. THE WEBPAGE INTRO SCREEN INFO BUTTON */}
+      {/* =========================================================================
+          THE WEBPAGE INTRO SCREEN INTERFACE
+          Placed completely OUTSIDE the model-viewer tags so they can never break or leak
+         ========================================================================= */}
       {!isBlurred && (
-        <button
-          onClick={() => setIsInfoOpen(true)}
-          style={{
-            position: 'absolute',
-            bottom: '50px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            padding: '12px 30px',
-            backgroundColor: 'rgba(255, 255, 255, 0.15)',
-            color: 'white',
-            border: '1px solid rgba(255,255,255,0.3)',
-            borderRadius: '20px',
-            fontWeight: 'bold',
-            fontSize: '14px',
-            backdropFilter: 'blur(4px)',
-            cursor: 'pointer',
-            zIndex: 10
-          }}
-        >
-          Info
-        </button>
+        <div style={{ position: 'absolute', bottom: '50px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', zIndex: 20 }}>
+          
+          {/* Primary Action Call: Custom trigger that targets the hidden native AR button above */}
+          <button
+            onClick={() => document.getElementById('ar-trigger')?.click()}
+            style={{
+              padding: '14px 28px', backgroundColor: '#2B4BAA', color: 'white',
+              border: '2px solid white', borderRadius: '30px', fontWeight: 'bold', fontSize: '16px',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.4)', cursor: 'pointer'
+            }}
+          >
+            See ICY in AR
+          </button>
+
+          {/* Clean Info Action Trigger */}
+          <button
+            onClick={() => setIsInfoOpen(true)}
+            style={{
+              padding: '10px 25px', backgroundColor: 'rgba(255, 255, 255, 0.15)', color: 'white',
+              border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', fontWeight: 'bold', fontSize: '14px',
+              backdropFilter: 'blur(4px)', cursor: 'pointer'
+            }}
+          >
+            Info
+          </button>
+
+        </div>
       )}
 
-      {/* 3. GRAPHIC INFORMATION POPUP PANEL */}
+      {/* 2. DESIGN FACTS CARD POPUP PANEL */}
       {isInfoOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)' }}>
           <div style={{ position: 'relative' }}>
@@ -177,15 +158,15 @@ const PenguinAR = () => {
               style={{ position: 'absolute', top: '12px', right: '12px', width: '30px', height: '30px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '18px', fontWeight: '300', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
             >✕</button>
             <img src="/images/info.png" alt="Penguin Facts Card" style={{ width: '340px', borderRadius: '24px', display: 'block' }} />
-            <img src="/images/try.png" alt="Card Interaction Handler" onClick={() => { setIsInfoOpen(false); setIsThankYouOpen(true); }} style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} />
+            <img src="/images/try.png" alt="Card Panel Handler" onClick={() => { setIsInfoOpen(false); setIsThankYouOpen(true); }} style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} />
           </div>
         </div>
       )}
 
-      {/* 4. CONSERVATION ACKNOWLEDGEMENT PANEL */}
+      {/* 3. THANK YOU FEEDBACK MODAL CARD */}
       {isThankYouOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)' }}>
-          <img src="/images/thankyou.png" alt="Thank You Dialogue Panel" style={{ width: '320px', display: 'block' }} />
+          <img src="/images/thankyou.png" alt="Appreciation Dialogue Card" style={{ width: '320px', display: 'block' }} />
         </div>
       )}
 
