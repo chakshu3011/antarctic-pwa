@@ -5,9 +5,11 @@ const PenguinAR = () => {
   const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
   
-  // FRAME CONTROLS FOR LIVE AR CAPTURE
+  // Frame Controls
+  const [isFrameModeOpen, setIsFrameModeOpen] = useState(false);
   const [activeFrame, setActiveFrame] = useState(null); // null, 'frame1', or 'frame2'
 
+  // Safety Timer for the Thank You screen
   useEffect(() => {
     if (isThankYouOpen) {
       const timer = setTimeout(() => {
@@ -17,56 +19,26 @@ const PenguinAR = () => {
     }
   }, [isThankYouOpen]);
 
-  // CAPTURES AR CANVAS AND MERGES ACTIVE PNG FRAME
-  const captureArSnapshot = async () => {
-    const viewer = document.querySelector('model-viewer');
-    if (!viewer) return;
+  // Platform Check: Detects if the visitor is using an iPhone/iPad
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-    // 1. Grab raw pixels from webxr canvas stream
-    const rawSceneBase64 = viewer.toDataURL({ format: 'png' });
-
-    const outputCanvas = document.createElement('canvas');
-    const drawingContext = outputCanvas.getContext('2d');
-    const underlyingSceneImg = new Image();
-
-    underlyingSceneImg.onload = () => {
-      outputCanvas.width = underlyingSceneImg.width;
-      outputCanvas.height = underlyingSceneImg.height;
-      
-      // Draw base photo background
-      drawingContext.drawImage(underlyingSceneImg, 0, 0);
-
-      // 2. Composite frame graphic directly over the scene matrix
-      if (activeFrame) {
-        const structuralFrameOverlay = new Image();
-        structuralFrameOverlay.src = activeFrame === 'frame1' ? '/images/frame1.png' : '/images/frame2.png';
-        structuralFrameOverlay.onload = () => {
-          drawingContext.drawImage(structuralFrameOverlay, 0, 0, outputCanvas.width, outputCanvas.height);
-          commitImageToDisk(outputCanvas);
-        };
-      } else {
-        commitImageToDisk(outputCanvas);
-      }
-    };
-    underlyingSceneImg.src = rawSceneBase64;
+  // Audio Playback Function
+  const playIcyVoice = () => {
+    const audio = new Audio('/audio/icy_voice.mp3'); // File goes into public/audio/
+    audio.play().catch(err => console.log("Audio waiting for user click:", err));
   };
 
-  const commitImageToDisk = (targetCanvas) => {
-    const finalDataStream = targetCanvas.toDataURL('image/png');
-    const localDownloaderAnchor = document.createElement('a');
-    localDownloaderAnchor.download = `Meet_ICY_Antarctic_Centre_${Date.now()}.png`;
-    localDownloaderAnchor.href = finalDataStream;
-    localDownloaderAnchor.click();
-  };
+  // If any major overlay is open, dim/blur the background AR space
+  const isBlurred = isInfoOpen || isThankYouOpen;
 
   return (
-    <div style={{ width: '100vw', height: '100dvh', margin: 0, padding: 0, overflow: 'hidden', backgroundColor: 'black' }}>
+    <div style={{ width: '100vw', height: '100dvh', margin: 0, padding: 0, overflow: 'hidden', backgroundColor: 'black', fontFamily: 'sans-serif' }}>
 
-      {/* 1. CORE ENGINE CONTAINER */}
+      {/* 1. IMMERSIVE 3D CANVAS */}
       <div style={{
         width: '100%', height: '100%',
         transition: 'filter 0.5s ease',
-        filter: isInfoOpen || isThankYouOpen ? 'blur(10px)' : 'none'
+        filter: isBlurred ? 'blur(10px)' : 'none'
       }}>
         <model-viewer
           src="/models/penguin1.glb"
@@ -81,77 +53,129 @@ const PenguinAR = () => {
           ar-scale="fixed"
           style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
         >
-          
-          {/* THE MASTER AR CAMERA SYSTEM LAYER */}
-          <div slot="ar-button" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100 }}>
-            
-            {/* Live Visual Frame Overlay in AR Mode */}
-            {activeFrame && (
-              <img 
-                src={activeFrame === 'frame1' ? '/images/frame1.png' : '/images/frame2.png'} 
-                alt="Active Frame Border"
-                style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', inset: 0, pointerEvents: 'none' }}
-              />
-            )}
-
-            {/* Custom AR Interactive HUD HUD Controls */}
-            <div style={{
-              position: 'absolute', bottom: '40px', left: 0, right: 0,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px',
-              pointerEvents: 'auto'
-            }}>
-              
-              {/* Frame Selection Row inside AR space */}
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setActiveFrame(activeFrame === 'frame1' ? null : 'frame1'); }}
-                  style={{ padding: '8px 16px', borderRadius: '15px', border: '1.5px solid white', backgroundColor: activeFrame === 'frame1' ? '#10b981' : 'rgba(43,75,170,0.85)', color: 'white', fontWeight: 'bold', fontSize: '12px' }}
-                >
-                  {activeFrame === 'frame1' ? 'Frame 1 Enabled' : 'Use Frame 1'}
-                </button>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setActiveFrame(activeFrame === 'frame2' ? null : 'frame2'); }}
-                  style={{ padding: '8px 16px', borderRadius: '15px', border: '1.5px solid white', backgroundColor: activeFrame === 'frame2' ? '#10b981' : 'rgba(43,75,170,0.85)', color: 'white', fontWeight: 'bold', fontSize: '12px' }}
-                >
-                  {activeFrame === 'frame2' ? 'Frame 2 Enabled' : 'Use Frame 2'}
-                </button>
-              </div>
-
-              {/* Dynamic Capture Trigger */}
-              <button
-                onClick={(e) => { e.stopPropagation(); captureArSnapshot(); }}
-                style={{
-                  width: '70px', height: '70px', backgroundColor: 'white',
-                  border: '5px solid #2B4BAA', borderRadius: '50%', boxShadow: '0 0 15px rgba(0,0,0,0.4)',
-                  cursor: 'pointer'
-                }}
-              />
-              
-              <p style={{ color: 'white', margin: 0, fontSize: '12px', textShadow: '1px 1px 4px rgba(0,0,0,0.8)', fontWeight: 'bold' }}>
-                Snap a photo with ICY!
-              </p>
-            </div>
-          </div>
-
+          {/* iOS will natively launch its camera view from this button */}
+          <button
+            slot="ar-button"
+            style={{
+              position: 'absolute', bottom: '120px', left: '50%', transform: 'translateX(-50%)',
+              padding: '14px 28px', backgroundColor: '#2B4BAA', color: 'white',
+              border: '2px solid white', borderRadius: '30px', fontWeight: 'bold', zIndex: 10,
+              boxShadow: '0 4px 15px rgba(0,0,0,0.4)', cursor: 'pointer'
+            }}
+          >
+            👋 View ICY in AR
+          </button>
         </model-viewer>
       </div>
 
-      {/* 2. CUTE CUSTOM BRANDED INTRODUCTION BUTTON */}
-      {!isInfoOpen && !isThankYouOpen && (
-        <button
-          onClick={() => setIsInfoOpen(true)}
-          style={{
-            position: 'absolute', bottom: '30px', right: '30px',
-            padding: '15px 30px', backgroundColor: '#2B4BAA', color: 'white',
-            border: '2px solid white', borderRadius: '50px', fontWeight: 'bold', fontSize: '18px',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.4)', zIndex: 20, cursor: 'pointer'
-          }}
-        >
-          Meet ICY 🐧
-        </button>
+      {/* 2. DYNAMIC LIVE FRAME OVERLAY LAYER (Web Screen View) */}
+      {isFrameModeOpen && activeFrame && !isBlurred && (
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 30 }}>
+          <img 
+            src={activeFrame === 'frame1' ? '/images/frame1.png' : '/images/frame2.png'} 
+            alt="Active Overlay Frame"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
+        </div>
       )}
 
-      {/* 3. INFO PANEL POPUP */}
+      {/* 3. PROFESSIONAL CLEAN HUDS (Hidden on Intro/Overlay states) */}
+      {!isBlurred && (
+        <>
+          {/* TOP LEFT: ICY'S AUDIO SPEAKER BUTTON (Always Visible for Web/Android view) */}
+          {!isFrameModeOpen && (
+            <button
+              onClick={playIcyVoice}
+              style={{
+                position: 'absolute', top: '30px', left: '30px',
+                width: '65px', height: '65px', backgroundColor: '#2B4BAA',
+                border: '2px solid white', borderRadius: '50%', cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)', zIndex: 25,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              <span style={{ fontSize: '20px' }}>🔊</span>
+              <span style={{ fontSize: '9px', color: 'white', fontWeight: 'bold', marginTop: '2px' }}>ICY'S VOICE</span>
+            </button>
+          )}
+
+          {/* BOTTOM MAIN NAV CONTROLS */}
+          <div style={{
+            position: 'absolute', bottom: '30px', left: 0, right: 0,
+            display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', zIndex: 25
+          }}>
+            
+            {/* If Frame Selection Is Closed -> Show Base Navigation */}
+            {!isFrameModeOpen ? (
+              <>
+                {/* ANDROID ONLY COMPONENT: Don't clutter iOS screen with frame logic */}
+                {!isIOS && (
+                  <button
+                    onClick={() => setIsFrameModeOpen(true)}
+                    style={{
+                      padding: '12px 24px', backgroundColor: '#10b981', color: 'white',
+                      border: '2px solid white', borderRadius: '50px', fontWeight: 'bold', cursor: 'pointer',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                    }}
+                  >
+                    🖼️ Choose Frame
+                  </button>
+                )}
+
+                <button
+                  onClick={() => setIsInfoOpen(true)}
+                  style={{
+                    padding: '15px 35px', backgroundColor: '#2B4BAA', color: 'white',
+                    border: '2px solid white', borderRadius: '50px', fontWeight: 'bold', fontSize: '16px',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.4)', cursor: 'pointer'
+                  }}
+                >
+                  Meet ICY 🐧
+                </button>
+              </>
+            ) : (
+              /* If Frame Selection Is Active -> Show Frame Controls Instead */
+              <div style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                backgroundColor: 'rgba(0, 0, 0, 0.75)', padding: '15px 25px',
+                borderRadius: '24px', border: '1px solid rgba(255,255,255,0.2)', gap: '12px'
+              }}>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button 
+                    onClick={() => setActiveFrame(activeFrame === 'frame1' ? null : 'frame1')}
+                    style={{
+                      padding: '10px 20px', borderRadius: '15px', border: 'none',
+                      backgroundColor: activeFrame === 'frame1' ? '#10b981' : '#374151',
+                      color: 'white', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px'
+                    }}
+                  >
+                    {activeFrame === 'frame1' ? '✓ Frame 1' : 'Frame 1'}
+                  </button>
+                  <button 
+                    onClick={() => setActiveFrame(activeFrame === 'frame2' ? null : 'frame2')}
+                    style={{
+                      padding: '10px 20px', borderRadius: '15px', border: 'none',
+                      backgroundColor: activeFrame === 'frame2' ? '#10b981' : '#374151',
+                      color: 'white', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px'
+                    }}
+                  >
+                    {activeFrame === 'frame2' ? '✓ Frame 2' : 'Frame 2'}
+                  </button>
+                </div>
+                
+                <button 
+                  onClick={() => { setIsFrameModeOpen(false); setActiveFrame(null); }}
+                  style={{ background: 'none', border: 'none', color: '#9ca3af', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
+                >
+                  Back to Main
+                </button>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* 4. DESIGN CARD INFO OVERLAY */}
       {isInfoOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)' }}>
           <div style={{ position: 'relative' }}>
@@ -165,7 +189,7 @@ const PenguinAR = () => {
         </div>
       )}
 
-      {/* 4. THANK YOU SCREEN MODAL */}
+      {/* 5. THANK YOU POST-GAME DIALOGUE PANEL */}
       {isThankYouOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)' }}>
           <img src="/images/thankyou.png" alt="Appreciation Frame" style={{ width: '320px', display: 'block' }} />
