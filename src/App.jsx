@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 const PenguinAR = () => {
-  // Navigation states to completely isolate our screens
   const [currentScreen, setCurrentScreen] = useState('intro'); // 'intro', 'ar-mode', 'info', 'thankyou'
   const [activeFrame, setActiveFrame] = useState(null); // null, 'frame1', or 'frame2'
 
-  // Automated timer to close the Thank You message
   useEffect(() => {
     if (currentScreen === 'thankyou') {
       const timer = setTimeout(() => {
@@ -16,7 +14,7 @@ const PenguinAR = () => {
     }
   }, [currentScreen]);
 
-  // Immersive Voice Audio Player
+  // Immersive Voice Audio Player - Works completely inside the camera screen now!
   const playIcyVoice = () => {
     const audio = new Audio('/audio/icy_voice.mp3'); 
     audio.play().catch(err => console.log("Audio waiting for user clearance:", err));
@@ -26,11 +24,11 @@ const PenguinAR = () => {
     <div style={{ width: '100vw', height: '100dvh', margin: 0, padding: 0, overflow: 'hidden', backgroundColor: 'black', fontFamily: 'sans-serif', position: 'relative' }}>
 
       {/* =========================================================
-          SCREEN 1: THE CLEAN INTRO WEB SCREEN
+          SCREEN 1: THE CLEAN INTRO WEB PREVIEW
           ========================================================= */}
       {currentScreen === 'intro' && (
         <div style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, zIndex: 10 }}>
-          {/* Base 3D Preview (No overlays, no frames, no audio) */}
+          {/* Base 3D Preview */}
           <model-viewer
             src="/models/penguin1.glb"
             autoplay
@@ -40,8 +38,8 @@ const PenguinAR = () => {
             style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
           />
           
-          {/* Bottom Center Navigation Column */}
-          <div style={{ position: 'absolute', bottom: '50px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+          {/* Bottom Center Navigation Row */}
+          <div style={{ position: 'absolute', bottom: '50px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', zIndex: 15 }}>
             <button
               onClick={() => setCurrentScreen('ar-mode')}
               style={{
@@ -68,12 +66,37 @@ const PenguinAR = () => {
       )}
 
       {/* =========================================================
-          SCREEN 2: THE AR VIEW (CAMERA INTERFACE)
+          SCREEN 2: TRUE IN-BROWSER AR CAMERA MODE (THE PIVOT)
           ========================================================= */}
       {currentScreen === 'ar-mode' && (
         <div style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, zIndex: 20 }}>
           
-          {/* Active PNG Frame Filter Layer */}
+          {/* 1. THE WEB CAMERA AR SCENE ENGINE */}
+          {/* This injects the camera stream directly into the background of your webpage */}
+          <a-scene 
+            embedded 
+            arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix;"
+            vr-mode-ui="enabled: false"
+            style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0 }}
+          >
+            {/* Asset Management System to pre-load ICY */}
+            <a-assets>
+              <a-asset-item id="icyModel" src="/models/penguin1.glb"></a-asset-item>
+            </a-assets>
+
+            {/* Markerless/Floor Anchor configuration */}
+            {/* Positioned slightly forward (z: -2) so ICY spawns instantly in front of the camera view */}
+            <a-entity 
+              gltf-model="#icyModel" 
+              position="0 -0.5 -2" 
+              scale="0.8 0.8 0.8"
+              animation-mixer="clip: idle;"
+            ></a-entity>
+
+            <a-entity camera></a-entity>
+          </a-scene>
+
+          {/* 2. LIVE INTERACTIVE HTML FRAMES (Renders flawlessly on top of the phone camera!) */}
           {activeFrame && (
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 25 }}>
               <img 
@@ -84,20 +107,7 @@ const PenguinAR = () => {
             </div>
           )}
 
-          {/* Full Screen Live AR Feed */}
-          <model-viewer
-            src="/models/penguin1.glb"
-            ios-src="https://antarctic-pwa.vercel.app/models/penguin1.usdz"
-            ar
-            ar-modes="quick-look webxr scene-viewer"
-            autoplay
-            animation-name="idle"
-            scale="10 10 10"
-            ar-placement="floor"
-            ar-scale="fixed"
-            style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
-          />
-
+          {/* 3. INTERACTIVE HUD BUTTON ROW */}
           {/* TOP CENTER: Audio Controller Button */}
           <div style={{ position: 'absolute', top: '40px', left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 30 }}>
             <button
@@ -137,14 +147,15 @@ const PenguinAR = () => {
               </button>
             </div>
 
-            {/* Back Button to safely return to Intro Screen */}
+            {/* Back Button to exit AR cleanly */}
             <button 
               onClick={() => { setCurrentScreen('intro'); setActiveFrame(null); }}
-              style={{ background: 'none', border: 'none', color: '#cbd5e1', fontWeight: 'bold', cursor: 'pointer', fontSize: '14px', textDecoration: 'underline' }}
+              style={{ background: 'rgba(0,0,0,0.6)', border: 'none', color: '#cbd5e1', padding: '6px 12px', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}
             >
-              Back to Main
+              ← Back to Main
             </button>
           </div>
+
         </div>
       )}
 
@@ -154,21 +165,12 @@ const PenguinAR = () => {
       {currentScreen === 'info' && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
           <div style={{ position: 'relative' }}>
-            {/* Close Button */}
             <button
               onClick={() => setCurrentScreen('intro')}
               style={{ position: 'absolute', top: '12px', right: '12px', width: '30px', height: '30px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '18px', fontWeight: '300', cursor: 'pointer', zIndex: 45, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
             >✕</button>
-            
             <img src="/images/info.png" alt="Penguin Facts Card" style={{ width: '340px', borderRadius: '24px', display: 'block' }} />
-            
-            {/* Action Button linking to Thank You screen */}
-            <img 
-              src="/images/try.png" 
-              alt="Action Trigger" 
-              onClick={() => setCurrentScreen('thankyou')} 
-              style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} 
-            />
+            <img src="/images/try.png" alt="Action Trigger" onClick={() => { setCurrentScreen('thankyou')} } style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} />
           </div>
         </div>
       )}
