@@ -46,7 +46,7 @@ const PenguinAR = () => {
           autoplay
           animation-name="idle"
           ar
-          ar-modes="quick-look webxr scene-viewer"
+          ar-modes="webxr"
           camera-controls
           scale="10 10 10"
           ar-placement="floor"
