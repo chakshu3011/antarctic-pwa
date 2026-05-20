@@ -15,16 +15,31 @@ const PenguinAR = () => {
     }
   }, [isThankYouOpen]);
 
-  const playIcyVoice = (e) => {
+  // Combined trigger function: Plays audio track AND opens AR view natively
+  const handleAudioAndAR = (e) => {
     e.stopPropagation(); 
+    
+    // 1. Play the audio track safely
     const audio = new Audio('/audio/icy_voice.mp3'); 
-    audio.play().catch(err => console.log("Audio play trace:", err));
+    audio.play().catch(err => console.log("Audio waiting for hardware clearance:", err));
+
+    // 2. Programmatically trigger the hidden native AR button
+    const nativeArButton = document.getElementById('hidden-native-ar-trigger');
+    if (nativeArButton) nativeArButton.click();
+  };
+
+  // Combined trigger function: Sets frame state AND opens AR view natively
+  const handleFrameAndAR = (frameName) => {
+    setActiveFrame(activeFrame === frameName ? null : frameName);
+    
+    // Programmatically trigger the hidden native AR button
+    const nativeArButton = document.getElementById('hidden-native-ar-trigger');
+    if (nativeArButton) nativeArButton.click();
   };
 
   const isBlurred = isInfoOpen || isThankYouOpen;
 
   return (
-    // Fixed viewport boundary that accounts for mobile address bars safely
     <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100dvh', margin: 0, padding: 0, overflow: 'hidden', backgroundColor: 'black', fontFamily: 'sans-serif' }}>
 
       {/* 1. MAIN DISPLAY MATRIX */}
@@ -32,7 +47,7 @@ const PenguinAR = () => {
         position: 'absolute',
         inset: 0,
         width: '100%',
-        height: '80%', // Pushes the model window up slightly to create clear bottom clearance
+        height: '80%', 
         transition: 'filter 0.5s ease',
         filter: isBlurred ? 'blur(10px)' : 'none',
         zIndex: 1
@@ -50,19 +65,14 @@ const PenguinAR = () => {
           ar-scale="fixed"
           style={{ width: '100%', height: '100%', display: 'block', backgroundColor: 'transparent' }}
         >
-          {/* Top Center Layout Row: Audio Track Controller */}
-          <div style={{ position: 'absolute', top: '30px', left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 10 }}>
-            <button
-              onClick={playIcyVoice}
-              style={{
-                padding: '12px 24px', backgroundColor: '#2B4BAA', color: 'white',
-                border: '2px solid white', borderRadius: '30px', fontWeight: 'bold', fontSize: '14px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.4)', cursor: 'pointer'
-              }}
-            >
-              🔊 Tap to hear ICY
-            </button>
-          </div>
+          
+          {/* CRITICAL FIXED CODE: Hidden native gatekeeper trigger required by model-viewer engine */}
+          <button 
+            slot="ar-button" 
+            id="hidden-native-ar-trigger" 
+            style={{ display: 'none' }}
+          ></button>
+
         </model-viewer>
       </div>
 
@@ -77,66 +87,83 @@ const PenguinAR = () => {
         </div>
       )}
 
-      {/* 3. SOLID BOTTOM NAVIGATION BLOCK (Sits safely above iOS bottom system panels) */}
+      {/* 3. BOTTOM UI CONTROLS STACK */}
       {!isBlurred && (
-        <div style={{ 
-          position: 'absolute', 
-          bottom: '80px', // Lifted higher to stay entirely clear of the iOS Safari address bar view
-          left: 0, 
-          right: 0, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center', 
-          gap: '16px', 
-          zIndex: 20 
-        }}>
-          
-          {/* ROW 1: Frame Selection Buttons directly underneath the 3D footprint */}
-          <div style={{ display: 'flex', gap: '12px', backgroundColor: 'rgba(0,0,0,0.6)', padding: '10px 18px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.15)' }}>
-            <button 
-              onClick={() => setActiveFrame(activeFrame === 'frame1' ? null : 'frame1')}
+        <>
+          {/* TOP CENTER PANEL: Tapping this plays audio AND activates native camera mode instantly */}
+          <div style={{ position: 'absolute', top: '30px', left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 20 }}>
+            <button
+              onClick={handleAudioAndAR}
               style={{
-                padding: '10px 20px', borderRadius: '12px', border: 'none',
-                backgroundColor: activeFrame === 'frame1' ? '#10b981' : '#374151',
-                color: 'white', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
+                padding: '12px 24px', backgroundColor: '#2B4BAA', color: 'white',
+                border: '2px solid white', borderRadius: '30px', fontWeight: 'bold', fontSize: '14px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.4)', cursor: 'pointer'
               }}
             >
-              {activeFrame === 'frame1' ? '✓ Frame 1' : 'Frame 1'}
-            </button>
-            <button 
-              onClick={() => setActiveFrame(activeFrame === 'frame2' ? null : 'frame2')}
-              style={{
-                padding: '10px 20px', borderRadius: '12px', border: 'none',
-                backgroundColor: activeFrame === 'frame2' ? '#10b981' : '#374151',
-                color: 'white', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
-              }}
-            >
-              {activeFrame === 'frame2' ? '✓ Frame 2' : 'Frame 2'}
+              🔊 Tap to hear ICY
             </button>
           </div>
 
-          {/* ROW 2: Minimalist Info Action Button centered cleanly directly below frames */}
-          <button
-            onClick={() => setIsInfoOpen(true)}
-            style={{
-              padding: '10px 30px', 
-              backgroundColor: 'rgba(255, 255, 255, 0.15)', 
-              color: 'white',
-              border: '1px solid rgba(255,255,255,0.3)', 
-              borderRadius: '20px', 
-              fontWeight: 'bold', 
-              fontSize: '14px',
-              backdropFilter: 'blur(4px)', 
-              cursor: 'pointer'
-            }}
-          >
-            Info
-          </button>
+          {/* BOTTOM COLUMN ROW PANELS */}
+          <div style={{ 
+            position: 'absolute', 
+            bottom: '80px', 
+            left: 0, 
+            right: 0, 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            gap: '16px', 
+            zIndex: 20 
+          }}>
+            
+            {/* ROW 1: Tapping either frame applies the layout state AND activates camera mode instantly */}
+            <div style={{ display: 'flex', gap: '12px', backgroundColor: 'rgba(0,0,0,0.6)', padding: '10px 18px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.15)' }}>
+              <button 
+                onClick={() => handleFrameAndAR('frame1')}
+                style={{
+                  padding: '10px 20px', borderRadius: '12px', border: 'none',
+                  backgroundColor: activeFrame === 'frame1' ? '#10b981' : '#374151',
+                  color: 'white', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
+                }}
+              >
+                {activeFrame === 'frame1' ? '✓ Frame 1' : 'Frame 1'}
+              </button>
+              <button 
+                onClick={() => handleFrameAndAR('frame2')}
+                style={{
+                  padding: '10px 20px', borderRadius: '12px', border: 'none',
+                  backgroundColor: activeFrame === 'frame2' ? '#10b981' : '#374151',
+                  color: 'white', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer'
+                }}
+              >
+                {activeFrame === 'frame2' ? '✓ Frame 2' : 'Frame 2'}
+              </button>
+            </div>
 
-        </div>
+            {/* ROW 2: Minimalist Info Action Button */}
+            <button
+              onClick={() => setIsInfoOpen(true)}
+              style={{
+                padding: '10px 30px', 
+                backgroundColor: 'rgba(255, 255, 255, 0.15)', 
+                color: 'white',
+                border: '1px solid rgba(255,255,255,0.3)', 
+                borderRadius: '20px', 
+                fontWeight: 'bold', 
+                fontSize: '14px',
+                backdropFilter: 'blur(4px)', 
+                cursor: 'pointer'
+              }}
+            >
+              Info
+            </button>
+
+          </div>
+        </>
       )}
 
-      {/* 4. POPUP CONTROL OVERLAY CARD: INFORMATION SHEET */}
+      {/* 4. GRAPHIC INFO MODAL CARD */}
       {isInfoOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)' }}>
           <div style={{ position: 'relative' }}>
@@ -145,15 +172,15 @@ const PenguinAR = () => {
               style={{ position: 'absolute', top: '12px', right: '12px', width: '30px', height: '30px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '18px', fontWeight: '300', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
             >✕</button>
             <img src="/images/info.png" alt="Penguin Facts Informational Card" style={{ width: '340px', borderRadius: '24px', display: 'block' }} />
-            <img src="/images/try.png" alt="Card Panel Interaction Handler" onClick={() => { setIsInfoOpen(false); setIsThankYouOpen(true); }} style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} />
+            <img src="/images/try.png" alt="Card Interaction Target" onClick={() => { setIsInfoOpen(false); setIsThankYouOpen(true); }} style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} />
           </div>
         </div>
       )}
 
-      {/* 5. POPUP CONTROL OVERLAY CARD: THANK YOU NOTE */}
+      {/* 5. THANK YOU DIALOGUE Note */}
       {isThankYouOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)' }}>
-          <img src="/images/thankyou.png" alt="Appreciation Dialogue Card" style={{ width: '320px', display: 'block' }} />
+          <img src="/images/thankyou.png" alt="Appreciation Frame Graphic" style={{ width: '320px', display: 'block' }} />
         </div>
       )}
 
