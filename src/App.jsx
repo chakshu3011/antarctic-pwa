@@ -5,11 +5,17 @@ const PenguinAR = () => {
   const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
   
-  // Hard-tracks if the phone's camera is actively running
   const [isArActive, setIsArActive] = useState(false); 
   const [isFrameActive, setIsFrameActive] = useState(false);
 
   const modelRef = useRef(null);
+  
+  // Audio references for the iOS background loop
+  const audioRef = useRef(new Audio('/audio/icy_voice.mp3'));
+  const loopTimeoutRef = useRef(null);
+
+  // Reliable iOS detector
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
   // Safely listens to the phone's native AR hardware status
   useEffect(() => {
@@ -18,18 +24,25 @@ const PenguinAR = () => {
 
     const handleARStatus = (event) => {
       if (event.detail.status === 'session-started') {
-        setIsArActive(true); // Camera turned on -> Switch to AR Menu
+        // ONLY trigger the custom HTML menu if it is Android (WebXR)
+        if (!isIOS) {
+          setIsArActive(true); 
+        }
       } else if (event.detail.status === 'not-presenting') {
-        setIsArActive(false); // Camera turned off -> Back to Web View
-        setIsFrameActive(false); // Reset frame
+        setIsArActive(false); 
+        setIsFrameActive(false); 
+        // If it's iOS, kill the background audio loop when they close Quick Look
+        if (isIOS) {
+          stopIOSAudioLoop();
+        }
       }
     };
 
     model.addEventListener('ar-status', handleARStatus);
     return () => model.removeEventListener('ar-status', handleARStatus);
-  }, []);
+  }, [isIOS]);
 
-  // Closes Thank You screen after 5 seconds
+  // Closes Thank You screen automatically
   useEffect(() => {
     if (isThankYouOpen) {
       const timer = setTimeout(() => setIsThankYouOpen(false), 5000);
@@ -37,10 +50,42 @@ const PenguinAR = () => {
     }
   }, [isThankYouOpen]);
 
+  // Manual Play for Android (Unchanged)
   const playIcyVoice = (e) => {
     e.stopPropagation(); 
     const audio = new Audio('/audio/icy_voice.mp3'); 
     audio.play().catch(err => console.log("Audio Error:", err));
+  };
+
+  // =========================================================================
+  // THE IOS CUSTOM BACKGROUND AUDIO ENGINE
+  // =========================================================================
+  const startIOSAudioLoop = () => {
+    // 1. UNLOCK TRICK: Play and instantly pause to bypass Apple's autoplay block
+    audioRef.current.play().then(() => {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+
+      // 2. The Looping Function
+      const playWithDelay = () => {
+        loopTimeoutRef.current = setTimeout(() => {
+          audioRef.current.play().catch(e => console.log("iOS Play blocked:", e));
+        }, 5000); // 5 second delay before playing
+      };
+
+      // 3. When audio finishes naturally, trigger the delay loop again
+      audioRef.current.onended = playWithDelay;
+
+      // Start the very first 5-second countdown
+      playWithDelay();
+    }).catch(e => console.log("Audio unlock failed:", e));
+  };
+
+  const stopIOSAudioLoop = () => {
+    if (loopTimeoutRef.current) clearTimeout(loopTimeoutRef.current);
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    audioRef.current.onended = null;
   };
 
   const isBlurred = isInfoOpen || isThankYouOpen;
@@ -62,7 +107,7 @@ const PenguinAR = () => {
           autoplay
           animation-name="idle"
           ar
-          ar-modes="webxr quick-look" // WebXR for Android overlay, Quick-look fallback for iOS
+          ar-modes="webxr quick-look" 
           camera-controls
           scale="10 10 10"
           ar-placement="floor"
@@ -70,31 +115,18 @@ const PenguinAR = () => {
           style={{ width: '100%', height: '100%', display: 'block', backgroundColor: 'transparent' }}
         >
           
-          {/* =========================================================================
-              THE REAL NATIVE AR LAUNCH BUTTON (Visible ONLY in Web View)
-              This is the only way browsers allow the camera to turn on safely.
-             ========================================================================= */}
           <button 
             slot="ar-button" 
-            style={{ 
-              position: 'absolute', bottom: '120px', left: '50%', transform: 'translateX(-50%)',
-              padding: '15px 35px', backgroundColor: '#2B4BAA', color: 'white',
-              border: '2px solid white', borderRadius: '35px', fontWeight: 'bold', fontSize: '16px',
-              boxShadow: '0 5px 20px rgba(0,0,0,0.4)', cursor: 'pointer',
-              display: isArActive ? 'none' : 'block' // Instantly hides itself when AR starts
-            }}
-          >
-            See ICY in AR
-          </button>
+            id="native-ar-system-trigger" 
+            style={{ display: 'none' }}
+          ></button>
 
           {/* =========================================================================
-              THE IMMERSIVE AR INTERFACE (Visible ONLY when Camera is on)
-              These must live INSIDE model-viewer to project onto the AR camera feed.
+              THE IMMERSIVE AR INTERFACE (ANDROID ONLY)
              ========================================================================= */}
-          {isArActive && (
+          {isArActive && !isIOS && (
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
               
-              {/* TOP: Audio Button */}
               <div style={{ position: 'absolute', top: '40px', left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
                 <button
                   onClick={playIcyVoice}
@@ -108,7 +140,6 @@ const PenguinAR = () => {
                 </button>
               </div>
 
-              {/* BOTTOM: Frame Button */}
               <div style={{ position: 'absolute', bottom: '40px', left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setIsFrameActive(!isFrameActive); }}
@@ -123,7 +154,6 @@ const PenguinAR = () => {
                 </button>
               </div>
 
-              {/* FRAME IMAGE OVERLAY */}
               {isFrameActive && (
                 <img 
                   src="/images/frame1.png" 
@@ -139,24 +169,49 @@ const PenguinAR = () => {
       </div>
 
       {/* =========================================================================
-          THE WEB VIEW INFO BUTTON (Visible ONLY in Web View)
+          THE WEB VIEW MAIN BUTTONS
          ========================================================================= */}
       {!isArActive && !isBlurred && (
-        <button
-          onClick={() => setIsInfoOpen(true)}
-          style={{
-            position: 'absolute', bottom: '60px', left: '50%', transform: 'translateX(-50%)',
-            padding: '10px 25px', backgroundColor: 'rgba(255, 255, 255, 0.15)', color: 'white',
-            border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', fontWeight: 'bold', fontSize: '14px',
-            backdropFilter: 'blur(4px)', cursor: 'pointer', zIndex: 20
-          }}
-        >
-          Info
-        </button>
+        <div style={{ position: 'absolute', bottom: '60px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', zIndex: 20 }}>
+          
+          <button
+            onClick={() => {
+              if (isIOS) {
+                // iOS Flow: Start background loop, trigger native Quick Look
+                startIOSAudioLoop();
+                const trigger = document.getElementById('native-ar-system-trigger');
+                if (trigger) trigger.click();
+              } else {
+                // Android Flow: Trigger standard WebXR setup
+                const trigger = document.getElementById('native-ar-system-trigger');
+                if (trigger) trigger.click();
+              }
+            }}
+            style={{
+              padding: '15px 35px', backgroundColor: '#2B4BAA', color: 'white',
+              border: '2px solid white', borderRadius: '35px', fontWeight: 'bold', fontSize: '16px',
+              boxShadow: '0 5px 20px rgba(0,0,0,0.4)', cursor: 'pointer'
+            }}
+          >
+            See ICY in AR
+          </button>
+
+          <button
+            onClick={() => setIsInfoOpen(true)}
+            style={{
+              padding: '10px 25px', backgroundColor: 'rgba(255, 255, 255, 0.15)', color: 'white',
+              border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px', fontWeight: 'bold', fontSize: '14px',
+              backdropFilter: 'blur(4px)', cursor: 'pointer'
+            }}
+          >
+            Info
+          </button>
+
+        </div>
       )}
 
       {/* =========================================================================
-          FACTS DIALOGUE POPUPS (Web View Overlays)
+          FACTS DIALOGUE POPUPS
          ========================================================================= */}
       {isInfoOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)' }}>
