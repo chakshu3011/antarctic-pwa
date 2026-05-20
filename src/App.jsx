@@ -223,11 +223,53 @@ const PenguinAR = () => {
         </div>
       )}
 
+      {/* OVERLAY: THANK YOU POPUP CARD LAYOUT */}
       {isThankYouOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)' }}>
-          <div style={{ position: 'relative' }}>
-            <button onClick={() => setIsThankYouOpen(false)} style={{ position: 'absolute', top: '12px', right: '12px', width: '30px', height: '30px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '18px', fontWeight: '300', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>✕</button>
-            <img src="/images/thankyou.png" alt="Thank You Feedback Card" style={{ width: '320px', borderRadius: '24px', display: 'block' }} />
+          <div style={{ position: 'relative', width: 'auto', height: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            
+            {/* FIXED CLOSE BUTTON: Uniformly aligned, clean, and scaling safe */}
+            <button
+              onClick={() => {
+                setIsThankYouOpen(false);
+              }}
+              style={{ 
+                position: 'absolute', 
+                top: '20px', 
+                right: '20px', 
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%', 
+                border: '1.5px solid white', 
+                backgroundColor: 'rgba(43, 75, 170, 0.9)', 
+                color: 'white', 
+                fontSize: '16px', 
+                fontWeight: 'bold', 
+                cursor: 'pointer', 
+                zIndex: 70, 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                padding: 0,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+              }}
+            >
+              ✕
+            </button>
+
+            {/* FIXED CONTAINER IMAGE: Constraints prevent any screen edge clipping */}
+            <img 
+              src="/images/thankyou.png" 
+              alt="Thank You Dialogue Panel" 
+              style={{ 
+                width: '90vw',
+                maxWidth: '340px', 
+                maxHeight: '80vh',
+                borderRadius: '24px', 
+                display: 'block',
+                objectFit: 'contain'
+              }}
+              />
           </div>
         </div>
       )}
