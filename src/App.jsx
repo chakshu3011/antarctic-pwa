@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 const PenguinAR = () => {
-  // Navigation & Screen Flow States
   const [isInfoOpen, setIsInfoOpen] = useState(false);
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
-  const [isInArMode, setIsInArMode] = useState(false); // Controls Web View vs AR View HUD
-  const [isFrameActive, setIsFrameActive] = useState(false); // Frame 1 Toggle
+  const [isInArMode, setIsInArMode] = useState(false); // Manages your flow step views
+  const [isFrameActive, setIsFrameActive] = useState(false);
 
-  // Automatically closes the Thank You panel after 5 seconds and resets to main web page
   useEffect(() => {
     if (isThankYouOpen) {
       const timer = setTimeout(() => {
@@ -18,7 +16,6 @@ const PenguinAR = () => {
     }
   }, [isThankYouOpen]);
 
-  // Audio Playback Engine
   const playIcyVoice = (e) => {
     e.stopPropagation(); 
     const audio = new Audio('/audio/icy_voice.mp3'); 
@@ -28,14 +25,14 @@ const PenguinAR = () => {
   const isBlurred = isInfoOpen || isThankYouOpen;
 
   return (
-    <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100dvh', margin: 0, padding: 0, overflow: 'hidden', backgroundColor: 'black', fontFamily: 'sans-serif' }}>
+    <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100dvh', margin: 0, padding: 0, overflow: 'hidden', backgroundColor: 'transparent', fontFamily: 'sans-serif' }}>
 
-      {/* 1. MASTER 3D RENDERING CANVAS */}
+      {/* 1. THE 3D MODEL CANVAS VIEWPORT */}
       <div style={{
         position: 'absolute',
         inset: 0,
         width: '100%',
-        height: '80%', // Keeps the model positioned upwards, clearing the bottom UI panels
+        height: '75%', // Squeezes the viewport window up to guarantee lower button clearance
         transition: 'filter 0.5s ease',
         filter: isBlurred ? 'blur(10px)' : 'none',
         zIndex: 1
@@ -46,44 +43,43 @@ const PenguinAR = () => {
           autoplay
           animation-name="idle"
           ar
-          ar-modes="webxr"
+          ar-modes="webxr" // FORCES browser-based camera streaming instead of phone native apps
           camera-controls
           scale="10 10 10"
           ar-placement="floor"
           ar-scale="fixed"
-          data-usb-fallback="false"
+          id="webxr-engine"
           style={{ width: '100%', height: '100%', display: 'block', backgroundColor: 'transparent' }}
         >
-          {/* Native Hidden Trigger Node required to launch the environment view */}
+          {/* Native target anchor required to execute camera permissions */}
           <button slot="ar-button" id="native-ar-system-trigger" style={{ display: 'none' }}></button>
         </model-viewer>
       </div>
 
-      {/* 2. ICE CRYSTAL OVERLAY FRAME (Renders safely on top of canvas) */}
+      {/* 2. THE SCREEN OVERLAY FRAME LAYER (Stays on screen globally if frame is turned on) */}
       {isFrameActive && !isBlurred && (
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}>
           <img 
             src="/images/frame1.png" 
             alt="Ice Crystal Frame Overlay"
-            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            style={{ width: '100%', height: '100%', objectFit: 'fill' }} // 'fill' forces it to lock exactly to screen dimensions
           />
         </div>
       )}
 
       {/* =========================================================================
-          FLOW SCREEN A: THE WEBPAGE VIEW INTERFACE
+          FLOW STATE 1: THE WEB PAGE OVERLAY HUD
          ========================================================================= */}
       {!isInArMode && !isBlurred && (
         <div style={{ position: 'absolute', bottom: '65px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', zIndex: 20 }}>
           
-          {/* Button 1: Enters AR View Layout Mode and triggers the system camera */}
           <button
             onClick={() => {
               setIsInArMode(true);
               setTimeout(() => {
                 const trigger = document.getElementById('native-ar-system-trigger');
                 if (trigger) trigger.click();
-              }, 100);
+              }, 150);
             }}
             style={{
               padding: '15px 35px', backgroundColor: '#2B4BAA', color: 'white',
@@ -94,7 +90,6 @@ const PenguinAR = () => {
             See ICY in AR
           </button>
 
-          {/* Button 2: Opens Info Panel Overlay */}
           <button
             onClick={() => setIsInfoOpen(true)}
             style={{
@@ -109,13 +104,12 @@ const PenguinAR = () => {
         </div>
       )}
 
-
       {/* =========================================================================
-          FLOW SCREEN B: THE IMMERSIVE AR VIEW INTERFACE
+          FLOW STATE 2: THE IMMERSIVE AR MODE OVERLAY HUD
          ========================================================================= */}
       {isInArMode && !isBlurred && (
         <>
-          {/* TOP CENTER PANEL: Audio Track Trigger */}
+          {/* Top Center: Always accessible Audio button */}
           <div style={{ position: 'absolute', top: '35px', left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 25 }}>
             <button
               onClick={playIcyVoice}
@@ -129,10 +123,9 @@ const PenguinAR = () => {
             </button>
           </div>
 
-          {/* BOTTOM NAVIGATION ROW: Toggle Frame & Back to Web controls */}
-          <div style={{ position: 'absolute', bottom: '70px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', zIndex: 25 }}>
+          {/* Bottom Controls: Frame Switcher and Exit Route */}
+          <div style={{ position: 'absolute', bottom: '80px', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', zIndex: 25 }}>
             
-            {/* Toggle Frame Switcher */}
             <button 
               onClick={() => setIsFrameActive(!isFrameActive)}
               style={{
@@ -145,7 +138,6 @@ const PenguinAR = () => {
               {isFrameActive ? '✓ Frame Active' : 'Toggle Frame'}
             </button>
 
-            {/* Back Button: Exits AR layout view and returns safely back to main Web flow */}
             <button
               onClick={() => { setIsInArMode(false); setIsFrameActive(false); }}
               style={{ background: 'none', border: 'none', color: '#9ca3af', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}
@@ -157,35 +149,30 @@ const PenguinAR = () => {
         </>
       )}
 
-
       {/* =========================================================================
-          OVERLAY OVERLAYS: INFO POPUP CARD LAYOUT
+          FACTS DIALOGUE POPUPS
          ========================================================================= */}
       {isInfoOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)' }}>
           <div style={{ position: 'relative' }}>
-            {/* Close Button -> Back to Web page layout screen */}
             <button
               onClick={() => setIsInfoOpen(false)}
               style={{ position: 'absolute', top: '12px', right: '12px', width: '30px', height: '30px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '18px', fontWeight: '300', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
             >✕</button>
-            <img src="/images/info.png" alt="Penguin Facts Informational Card" style={{ width: '340px', borderRadius: '24px', display: 'block' }} />
-            {/* I'll Try button triggers the next card state logic */}
+            <img src="/images/info.png" alt="Penguin Facts Card" style={{ width: '340px', borderRadius: '24px', display: 'block' }} />
             <img src="/images/try.png" alt="Card Panel Handler" onClick={() => { setIsInfoOpen(false); setIsThankYouOpen(true); }} style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} />
           </div>
         </div>
       )}
 
-      {/* OVERLAY OVERLAYS: THANK YOU POPUP CARD LAYOUT */}
       {isThankYouOpen && (
-        <div style={{ position: 'absolute', inset: 1, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)' }}>
+        <div style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)' }}>
           <div style={{ position: 'relative' }}>
-            {/* Close Button -> Back to Web page layout screen */}
             <button
               onClick={() => setIsThankYouOpen(false)}
               style={{ position: 'absolute', top: '12px', right: '12px', width: '30px', height: '30px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '18px', fontWeight: '300', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
             >✕</button>
-            <img src="/images/thankyou.png" alt="Thank You Dialogue Panel" style={{ width: '320px', borderRadius: '24px', display: 'block' }} />
+            <img src="/images/thankyou.png" alt="Thank You Feedback Card" style={{ width: '320px', borderRadius: '24px', display: 'block' }} />
           </div>
         </div>
       )}
