@@ -19,7 +19,7 @@ const PenguinAR = () => {
   const playIcyVoice = (e) => {
     e.stopPropagation();
     const audio = new Audio('/audio/icy_voice.mp3'); 
-    audio.play().catch(err => console.log("Audio waiting for user click:", err));
+    audio.play().catch(err => console.log("Audio activation trace:", err));
   };
 
   const isBlurred = isInfoOpen || isThankYouOpen;
@@ -27,7 +27,7 @@ const PenguinAR = () => {
   return (
     <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', margin: 0, padding: 0, overflow: 'hidden', backgroundColor: '#000000', fontFamily: 'sans-serif' }}>
 
-      {/* 1. THE 3D ENGINE VIEWPORT CONTAINER */}
+      {/* 1. THE WEB-BASED AR VIEWPORT */}
       <div style={{
         position: 'absolute', inset: 0, width: '100%', height: '100%',
         transition: 'filter 0.5s ease',
@@ -39,46 +39,41 @@ const PenguinAR = () => {
           ios-src="https://antarctic-pwa.vercel.app/models/penguin1.usdz"
           autoplay
           animation-name="idle"
-          ar
-          ar-modes="quick-look webxr scene-viewer"
           camera-controls
-          
-          /* FIXED SIZING: Lowering global scale from 10 to 1 prevents massive iOS rendering distortion */
           scale="1 1 1"
           
-          /* FIXED TRACKING: Shadows and neutral lighting tell Android exactly where the floor plane is */
+          {/* WebXR mode runs directly inside your browser layout, keeping your custom HTML frames active */}
+          ar
+          ar-modes="webxr" 
           ar-placement="floor"
           ar-scale="fixed"
           shadow-intensity="1.5"
-          shadow-softness="0.5"
           environment-image="neutral"
           exposure="1.2"
           style={{ width: '100%', height: '100%', display: 'block', backgroundColor: 'transparent' }}
         >
-          {/* Hidden link to launch tracking mode */}
+          {/* Hidden activation gatekeeper fallback */}
           <button id="hidden-ar-trigger" slot="ar-button" style={{ display: 'none' }}></button>
         </model-viewer>
       </div>
 
-      {/* 2. THE WEBPAGE INTRO VIEW (isCamActive === false) */}
+      {/* 2. LIVE TRANSPARENT OVERLAY FRAME LAYER */}
+      {/* This renders directly on top of the web camera view so users can snap a clean screenshot */}
+      {activeFrame && !isBlurred && (
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}>
+          <img 
+            src={activeFrame === 'frame1' ? '/images/frame1.png' : '/images/frame2.png'} 
+            alt="Active Framing Matrix"
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          />
+        </div>
+      )}
+
+      {/* 3. STATIC WEB INTRO HUD (isCamActive === false) */}
       {!isCamActive && !isBlurred && (
-        <div style={{ 
-          position: 'absolute', 
-          bottom: '10vh', // FIXED POSITIONING: Raised up to prevent buttons from sinking off screen
-          left: 0, 
-          right: 0, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center', 
-          gap: '16px', 
-          zIndex: 10 
-        }}>
-          
+        <div style={{ position: 'absolute', bottom: '10vh', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', zIndex: 20 }}>
           <button
-            onClick={() => {
-              setIsCamActive(true);
-              document.getElementById('hidden-ar-trigger')?.click();
-            }}
+            onClick={() => setIsCamActive(true)}
             style={{
               padding: '14px 32px', backgroundColor: '#2B4BAA', color: 'white',
               border: '2px solid white', borderRadius: '30px', fontWeight: 'bold', fontSize: '16px',
@@ -101,19 +96,11 @@ const PenguinAR = () => {
         </div>
       )}
 
-      {/* 3. IMAGES / INTERACTIVE HUD LAYER (isCamActive === true) */}
+      {/* 4. ACTIVE WEBAR CAMERA HUD COMPONENTS (isCamActive === true) */}
       {isCamActive && !isBlurred && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 20, pointerEvents: 'none' }}>
           
-          {activeFrame && (
-            <img 
-              src={activeFrame === 'frame1' ? '/images/frame1.png' : '/images/frame2.png'} 
-              alt="Active Frame Border"
-              style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'absolute', inset: 0 }}
-            />
-          )}
-
-          {/* Top Audio Component */}
+          {/* Top Audio Layer Component */}
           <div style={{ position: 'absolute', top: '45px', left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
             <button
               onClick={playIcyVoice}
@@ -127,8 +114,8 @@ const PenguinAR = () => {
             </button>
           </div>
 
-          {/* Bottom Frames Picker Grid */}
-          <div style={{ position: 'absolute', bottom: '8vh', left: 0, right: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', pointerEvents: 'auto' }}>
+          {/* Bottom Interactive Frame Picker Triggers */}
+          <div style={{ position: 'absolute', bottom: '8vh', left: 0, right: 0, display: 'flex', justifyContent: 'center', pointerEvents: 'auto' }}>
             <div style={{ display: 'flex', gap: '12px', backgroundColor: 'rgba(0,0,0,0.85)', padding: '12px 20px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.15)' }}>
               <button 
                 onClick={() => setActiveFrame(activeFrame === 'frame1' ? null : 'frame1')}
@@ -151,19 +138,12 @@ const PenguinAR = () => {
                 {activeFrame === 'frame2' ? '✓ Frame 2' : 'Frame 2'}
               </button>
             </div>
-
-            <button 
-              onClick={() => { setIsCamActive(false); setActiveFrame(null); }}
-              style={{ background: 'none', border: 'none', color: '#d1d5db', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px', textDecoration: 'underline' }}
-            >
-              Exit Camera View
-            </button>
           </div>
 
         </div>
       )}
 
-      {/* 4. FACTS GRAPHIC PANEL POPUP */}
+      {/* 5. AR FACTS GRAPHIC OVERLAY CARD */}
       {isInfoOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)' }}>
           <div style={{ position: 'relative' }}>
@@ -172,15 +152,15 @@ const PenguinAR = () => {
               style={{ position: 'absolute', top: '12px', right: '12px', width: '30px', height: '30px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '18px', fontWeight: '300', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
             >✕</button>
             <img src="/images/info.png" alt="Penguin Facts Card" style={{ width: '340px', borderRadius: '24px', display: 'block' }} />
-            <img src="/images/try.png" alt="Dialogue Dismiss Button" onClick={() => { setIsInfoOpen(false); setIsThankYouOpen(true); }} style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} />
+            <img src="/images/try.png" alt="Dismiss Dialogue Target" onClick={() => { setIsInfoOpen(false); setIsThankYouOpen(true); }} style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} />
           </div>
         </div>
       )}
 
-      {/* 5. THANK YOU DIALOGUE PANEL */}
+      {/* 6. THANK YOU POST-INTERACTION MODAL CARD */}
       {isThankYouOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)' }}>
-          <img src="/images/thankyou.png" alt="Thank You Feedback Card" style={{ width: '320px', display: 'block' }} />
+          <img src="/images/thankyou.png" alt="Thank You Feedback Graphic" style={{ width: '320px', display: 'block' }} />
         </div>
       )}
 
