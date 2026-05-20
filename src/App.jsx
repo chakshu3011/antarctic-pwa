@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 const PenguinAR = () => {
@@ -7,10 +7,6 @@ const PenguinAR = () => {
   const [isInArMode, setIsInArMode] = useState(false); 
   const [isFrameActive, setIsFrameActive] = useState(false); 
 
-  // Persistent reference holder to manage active audio streams safely
-  const audioRef = useRef(null);
-
-  // Automatically closes the Thank You panel after 5 seconds
   useEffect(() => {
     if (isThankYouOpen) {
       const timer = setTimeout(() => {
@@ -20,23 +16,9 @@ const PenguinAR = () => {
     }
   }, [isThankYouOpen]);
 
-  // Safely stops any active playing audio track
-  const stopIcyVoice = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0; // Rewind track to start
-    }
-  };
-
-  // Audio Playback Engine
   const playIcyVoice = (e) => {
     e.stopPropagation(); 
-    
-    // Stop any existing playback track before starting a new one
-    stopIcyVoice();
-
     const audio = new Audio('/audio/icy_voice.mp3'); 
-    audioRef.current = audio;
     audio.play().catch(err => console.log("Audio track trace:", err));
   };
 
@@ -61,11 +43,12 @@ const PenguinAR = () => {
           autoplay
           animation-name="idle"
           ar
-          ar-modes="quick-look webxr scene-viewer"
+          ar-modes="webxr"
           camera-controls
           scale="10 10 10"
           ar-placement="floor"
           ar-scale="fixed"
+          data-usb-fallback="false"
           style={{ width: '100%', height: '100%', display: 'block', backgroundColor: 'transparent' }}
         >
           <button slot="ar-button" id="native-ar-system-trigger" style={{ display: 'none' }}></button>
@@ -145,13 +128,8 @@ const PenguinAR = () => {
               {isFrameActive ? '✓ Frame Active' : 'Toggle Frame'}
             </button>
 
-            {/* Back Button explicitly kills any running audio streams when exiting */}
             <button
-              onClick={() => { 
-                setIsInArMode(false); 
-                setIsFrameActive(false); 
-                stopIcyVoice(); 
-              }}
+              onClick={() => { setIsInArMode(false); setIsFrameActive(false); }}
               style={{ background: 'none', border: 'none', color: '#9ca3af', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}
             >
               Back to Web View
@@ -177,51 +155,12 @@ const PenguinAR = () => {
       {/* OVERLAY: THANK YOU POPUP CARD LAYOUT */}
       {isThankYouOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)' }}>
-          <div style={{ position: 'relative', width: 'auto', height: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            
-            {/* FIXED CLOSE BUTTON: Uniformly aligned, clean, and scaling safe */}
+          <div style={{ position: 'relative' }}>
             <button
-              onClick={() => {
-                setIsThankYouOpen(false);
-                stopIcyVoice(); // Ensures audio stops if they close the modal manually
-              }}
-              style={{ 
-                position: 'absolute', 
-                top: '20px', 
-                right: '20px', 
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '50%', 
-                border: '1.5px solid white', 
-                backgroundColor: 'rgba(43, 75, 170, 0.9)', 
-                color: 'white', 
-                fontSize: '16px', 
-                fontWeight: 'bold', 
-                cursor: 'pointer', 
-                zIndex: 70, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                padding: 0,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-              }}
-            >
-              ✕
-            </button>
-
-            {/* FIXED CONTAINER IMAGE: Constraints prevent any screen edge clipping */}
-            <img 
-              src="/images/thankyou.png" 
-              alt="Thank You Dialogue Panel" 
-              style={{ 
-                width: '90vw',
-                maxWidth: '340px', 
-                maxHeight: '80vh',
-                borderRadius: '24px', 
-                display: 'block',
-                objectFit: 'contain'
-              }} 
-            />
+              onClick={() => setIsThankYouOpen(false)}
+              style={{ position: 'absolute', top: '12px', right: '12px', width: '30px', height: '30px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '18px', fontWeight: '300', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+            >✕</button>
+            <img src="/images/thankyou.png" alt="Thank You Dialogue Panel" style={{ width: '320px', borderRadius: '24px', display: 'block' }} />
           </div>
         </div>
       )}
