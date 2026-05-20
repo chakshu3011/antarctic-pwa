@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 const PenguinAR = () => {
@@ -6,6 +6,9 @@ const PenguinAR = () => {
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
   const [isInArMode, setIsInArMode] = useState(false); 
   const [isFrameActive, setIsFrameActive] = useState(false); 
+
+  // Persistent reference to control the active audio stream
+  const audioRef = useRef(null);
 
   useEffect(() => {
     if (isThankYouOpen) {
@@ -16,9 +19,20 @@ const PenguinAR = () => {
     }
   }, [isThankYouOpen]);
 
+  // Stops and resets the audio safely
+  const stopIcyVoice = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  };
+
   const playIcyVoice = (e) => {
     e.stopPropagation(); 
+    stopIcyVoice(); // Stop any currently playing audio before starting a new one
+    
     const audio = new Audio('/audio/icy_voice.mp3'); 
+    audioRef.current = audio;
     audio.play().catch(err => console.log("Audio track trace:", err));
   };
 
@@ -129,7 +143,11 @@ const PenguinAR = () => {
             </button>
 
             <button
-              onClick={() => { setIsInArMode(false); setIsFrameActive(false); }}
+              onClick={() => { 
+                setIsInArMode(false); 
+                setIsFrameActive(false); 
+                stopIcyVoice(); // KILLS AUDIO WHEN EXITING AR VIEW
+              }}
               style={{ background: 'none', border: 'none', color: '#9ca3af', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}
             >
               Back to Web View
@@ -141,13 +159,16 @@ const PenguinAR = () => {
       {/* OVERLAY: INFO POPUP CARD LAYOUT */}
       {isInfoOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)' }}>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
+            {/* Placed outside the image boundary so it never shadows text */}
             <button
-              onClick={() => setIsInfoOpen(false)}
-              style={{ position: 'absolute', top: '12px', right: '12px', width: '30px', height: '30px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '18px', fontWeight: '300', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+              onClick={() => { setIsInfoOpen(false); stopIcyVoice(); }}
+              style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
             >✕</button>
-            <img src="/images/info.png" alt="Penguin Facts Informational Card" style={{ width: '340px', borderRadius: '24px', display: 'block' }} />
-            <img src="/images/try.png" alt="Card Panel Handler" onClick={() => { setIsInfoOpen(false); setIsThankYouOpen(true); }} style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} />
+            <div style={{ position: 'relative' }}>
+              <img src="/images/info.png" alt="Penguin Facts Informational Card" style={{ width: '340px', borderRadius: '24px', display: 'block' }} />
+              <img src="/images/try.png" alt="Card Panel Handler" onClick={() => { setIsInfoOpen(false); setIsThankYouOpen(true); }} style={{ position: 'absolute', bottom: '45px', left: '50%', transform: 'translateX(-50%)', width: '120px', cursor: 'pointer' }} />
+            </div>
           </div>
         </div>
       )}
@@ -155,10 +176,11 @@ const PenguinAR = () => {
       {/* OVERLAY: THANK YOU POPUP CARD LAYOUT */}
       {isThankYouOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)' }}>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px' }}>
+            {/* Placed completely above the graphic to protect the "Thank You Human!" title */}
             <button
-              onClick={() => setIsThankYouOpen(false)}
-              style={{ position: 'absolute', top: '12px', right: '12px', width: '30px', height: '30px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '18px', fontWeight: '300', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+              onClick={() => { setIsThankYouOpen(false); stopIcyVoice(); }}
+              style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1.5px solid white', backgroundColor: '#2B4BAA', color: 'white', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
             >✕</button>
             <img src="/images/thankyou.png" alt="Thank You Dialogue Panel" style={{ width: '320px', borderRadius: '24px', display: 'block' }} />
           </div>
