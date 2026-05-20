@@ -51,6 +51,7 @@ const PenguinAR = () => {
           scale="10 10 10"
           ar-placement="floor"
           ar-scale="fixed"
+          data-usb-fallback="false"
           style={{ width: '100%', height: '100%', display: 'block', backgroundColor: 'transparent' }}
         >
           {/* Native Hidden Trigger Node required to launch the environment view */}
