@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ARGame from "./Pages/ARGame";
 
 const PenguinAR = () => {
   const [isInfoOpen, setIsInfoOpen] = useState(false);
@@ -192,8 +193,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<PenguinAR />} />
-        <Route path="/penguin" element={<PenguinAR />} />
+        <Route path="/"          element={<PenguinAR />} />
+        <Route path="/penguin"   element={<PenguinAR />} />
+        <Route path="/ARpenguin" element={<PenguinAR />} />
+        <Route path="/game"      element={<ARGame />} />
+        <Route path="/ARgame"    element={<ARGame />} />
       </Routes>
     </BrowserRouter>
   );
