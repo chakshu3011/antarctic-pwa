@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 const ROWS       = 5;
 const COLS       = 3;
 const MAX_LIVES  = 5;
-const MOVE_SEC   = 10;   // seconds per tap
+const MOVE_SEC   = 20;   // seconds per tap
 const GAME_SEC   = 180;  // 3 min overall
 
 // ── Quiz pool ─────────────────────────────────────────────────────────────────
@@ -302,11 +302,11 @@ const ARGame = () => {
           padding: '20px 20px 32px', boxSizing: 'border-box',
         }}>
           <div style={{ textAlign: 'center', marginBottom: '6px' }}>
-            <div style={{ fontSize: '11px', letterSpacing: '3px', color: '#60a5fa', fontWeight: 'bold' }}>M-HIT · ANTARCTIC AR</div>
+          
             <h1 style={{ margin: '2px 0 0', fontSize: 'clamp(28px,7vw,36px)', fontWeight: '900', color: '#bfdbfe', textShadow: '0 0 30px rgba(96,165,250,0.7)', lineHeight: 1.1 }}>
               ICE SWEET ICE
             </h1>
-            <div style={{ fontSize: '12px', color: '#7dd3fc', marginTop: '2px' }}>🐧 Antarctic Rescue Mission</div>
+            <div style={{ fontSize: '14px', color: '#7dd3fc', marginTop: '2px' }}>🐧 Antarctic Rescue Mission</div>
           </div>
 
           <div style={{ width: '100%', maxWidth: '280px', height: '190px', borderRadius: '20px', overflow: 'hidden', background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(147,197,253,0.4)', margin: '12px 0' }}>
@@ -324,7 +324,7 @@ const ARGame = () => {
           <div style={{ width: '100%', maxWidth: '300px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(147,197,253,0.25)', borderRadius: '16px', padding: '14px 16px', marginBottom: '12px', boxSizing: 'border-box' }}>
             <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: 'bold', color: '#93c5fd' }}>🐧 Mission Brief</p>
             <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#cbd5e1', lineHeight: 1.6 }}>
-              Baby penguin <strong>ICY</strong> must complete <strong>2 stages</strong> to reunite with its parents!
+              Baby penguin <strong>ICY'BABY</strong> must complete <strong>2 stages</strong> to reunite with its parents!
             </p>
             <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
               <div style={{ flex: 1, background: 'rgba(96,165,250,0.15)', border: '1px solid rgba(96,165,250,0.4)', borderRadius: '10px', padding: '8px', textAlign: 'center' }}>
@@ -339,13 +339,12 @@ const ARGame = () => {
               </div>
             </div>
             <p style={{ margin: 0, fontSize: '11px', color: '#60a5fa', lineHeight: 1.6 }}>
-              ⏱️ 3 min total · ❤️×5 lives · 🦭 10s per move<br />
-              🔀 Randomised every game — no memorising!
+              ⏱️ 3 min total · ❤️×5 lives · 🦭 20s per move
             </p>
           </div>
 
           <button onClick={activateAR} style={{ padding: '9px 22px', background: 'rgba(29,78,216,0.7)', color: 'white', border: '1px solid #93c5fd', borderRadius: '18px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '10px' }}>
-            📱 Preview ICY in AR
+            📱 Preview ICY'S BABY in AR
           </button>
           <button onClick={startGame} style={{ padding: '15px 48px', background: 'linear-gradient(135deg,#1d4ed8,#2563eb)', color: 'white', border: '2px solid #93c5fd', borderRadius: '36px', fontSize: '17px', fontWeight: '900', cursor: 'pointer', boxShadow: '0 4px 28px rgba(37,99,235,0.6)', letterSpacing: '1px', WebkitTapHighlightColor: 'transparent' }}>
             🚀 BEGIN RESCUE
