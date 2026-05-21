@@ -1449,22 +1449,24 @@ const ARGame = () => {
             marginBottom: '18px',
           }}>
             <model-viewer
-              id="ar-end-mv"
-              src="/models/penguin1.glb"
-              ios-src="/models/penguin1.usdz"
-              ar
-              ar-modes="webxr scene-viewer quick-look"
-              ar-placement="floor"
-              camera-controls
-              autoplay
-              scale="8 8 8"
-              onArStatus={handleARStatus}
-              style={{
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'transparent',
-              }}
-            ></model-viewer>
+  id="ar-end-mv"
+  src="/models/walking_emperor_penguin_chick.glb"
+  ios-src="/models/Walking_Emperor_Penguin_Chick.usdz"
+  ar
+  ar-modes="webxr scene-viewer quick-look"
+  ar-placement="floor"
+  ar-scale="fixed"
+  camera-controls
+  autoplay
+  animation-name="walk"
+  scale="5 5 5"
+  onArStatus={handleARStatus}
+  style={{
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+  }}
+></model-viewer>
           </div>
 
           <button onClick={() => activateAR('ar-end-mv')} style={{
@@ -1478,7 +1480,7 @@ const ARGame = () => {
             cursor: 'pointer',
             marginBottom: '10px',
           }}>
-            📱 View Baby Penguin in AR
+            📱 View ICY'S Baby Penguin in AR
           </button>
 
           <button onClick={startGame} style={{
