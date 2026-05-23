@@ -236,8 +236,8 @@ const PenguinAR = () => {
               }}
               style={{ 
                 position: 'absolute', 
-                top: '-20px',   // Changed from 20px
-                right: '-20px', // Changed from 20px
+                top: '-26px',   // Changed from 20px
+                right: '-26px', // Changed from 20px
                 width: '32px', 
                 height: '32px', 
                 borderRadius: '50%', 
