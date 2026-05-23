@@ -110,7 +110,7 @@ const PenguinAR = () => {
           ar
           ar-modes="webxr quick-look" 
           camera-controls
-          scale="10 10 10"
+          // scale="10 10 10"
           ar-placement="floor"
           ar-scale="fixed"
           style={{ width: '100%', height: '100%', display: 'block', backgroundColor: 'transparent' }}
@@ -236,8 +236,8 @@ const PenguinAR = () => {
               }}
               style={{ 
                 position: 'absolute', 
-                top: '-16px',   // Changed from 20px
-                right: '-16px', // Changed from 20px
+                top: '-20px',   // Changed from 20px
+                right: '-20px', // Changed from 20px
                 width: '32px', 
                 height: '32px', 
                 borderRadius: '50%', 
