@@ -229,36 +229,7 @@ const PenguinAR = () => {
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)' }}>
           <div style={{ position: 'relative', width: 'auto', height: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             
-            {/* FIXED CLOSE BUTTON: Pulled outwards using negative values */}
-            <button
-              onClick={() => {
-                setIsThankYouOpen(false);
-              }}
-              style={{ 
-                position: 'absolute', 
-                top: '-26px',   // Changed from 20px
-                right: '-26px', // Changed from 20px
-                width: '32px', 
-                height: '32px', 
-                borderRadius: '50%', 
-                border: '1.5px solid white', 
-                backgroundColor: 'rgba(43, 75, 170, 0.9)', 
-                color: 'white', 
-                fontSize: '16px', 
-                fontWeight: 'bold', 
-                cursor: 'pointer', 
-                zIndex: 70, 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                padding: 0,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
-              }}
-            >
-              ✕
-            </button>
-
-            {/* FIXED CONTAINER IMAGE: Removed border-radius to prevent clipping */}
+            {/* CONTAINER IMAGE: Button removed, auto-closes via useEffect after 5s */}
             <img 
               src="/images/thankyou.png" 
               alt="Thank You Dialogue Panel" 
