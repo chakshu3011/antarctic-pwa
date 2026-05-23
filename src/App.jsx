@@ -228,15 +228,15 @@ const PenguinAR = () => {
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(5px)' }}>
           <div style={{ position: 'relative', width: 'auto', height: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             
-            {/* FIXED CLOSE BUTTON: Uniformly aligned, clean, and scaling safe */}
+            {/* FIXED CLOSE BUTTON: Pulled outwards using negative values */}
             <button
               onClick={() => {
                 setIsThankYouOpen(false);
               }}
               style={{ 
                 position: 'absolute', 
-                top: '20px', 
-                right: '20px', 
+                top: '-16px',   // Changed from 20px
+                right: '-16px', // Changed from 20px
                 width: '32px', 
                 height: '32px', 
                 borderRadius: '50%', 
@@ -257,7 +257,7 @@ const PenguinAR = () => {
               ✕
             </button>
 
-            {/* FIXED CONTAINER IMAGE: Constraints prevent any screen edge clipping */}
+            {/* FIXED CONTAINER IMAGE: Removed border-radius to prevent clipping */}
             <img 
               src="/images/thankyou.png" 
               alt="Thank You Dialogue Panel" 
@@ -265,15 +265,13 @@ const PenguinAR = () => {
                 width: '90vw',
                 maxWidth: '340px', 
                 maxHeight: '80vh',
-                borderRadius: '24px', 
                 display: 'block',
                 objectFit: 'contain'
               }}
-              />
+            />
           </div>
         </div>
       )}
-
     </div>
   );
 };
