@@ -627,7 +627,7 @@ const ARGame = () => {
               color: '#cbd5e1',
               lineHeight: 1.6,
             }}>
-              Baby penguin <strong>ICY&apos;S BABY</strong> must complete <strong>2 stages</strong> to reunite with its parents!
+              Baby penguin <strong>ICY'S BABY</strong> must complete <strong>2 stages</strong> to reunite with its parents!
             </p>
 
             <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
@@ -683,7 +683,7 @@ const ARGame = () => {
             cursor: 'pointer',
             marginBottom: '10px',
           }}>
-            📱 Preview ICY&apos;S BABY in AR
+            📱 Preview ICY'S BABY in AR
           </button>
 
           <button onClick={startGame} style={{
@@ -739,7 +739,7 @@ const ARGame = () => {
             lineHeight: 1.6,
             maxWidth: '250px',
           }}>
-            ICY&apos;S BABY crossed the ice field! But the family reunion isn&apos;t over — the parents need proof you know the Antarctic!
+            ICY'S BABY crossed the ice field! But the family reunion isn&apos;t over — the parents need proof you know the Antarctic!
           </p>
 
           <div style={{
@@ -761,7 +761,7 @@ const ARGame = () => {
               color: '#94a3b8',
               marginTop: '4px',
             }}>
-              Answer 5 randomised questions correctly to reunite ICY&apos;S BABY with its family!
+              Answer 5 randomised questions correctly to reunite ICY'S BABY with its family!
             </div>
           </div>
 
@@ -1166,7 +1166,7 @@ const ARGame = () => {
                 color: '#c4b5fd',
                 marginBottom: '3px',
               }}>
-                ICY&apos;S BABY awaits the answer...
+                ICY'S BABY awaits the answer...
               </div>
 
               <div style={{
@@ -1410,7 +1410,7 @@ const ARGame = () => {
             maxWidth: '260px',
             lineHeight: 1.6,
           }}>
-            ICY&apos;S BABY crossed the ice field AND passed the Antarctic quiz! The sea lion retreats in defeat. 🦭🚫
+            ICY'S BABY crossed the ice field AND passed the Antarctic quiz! The sea lion retreats in defeat. 🦭🚫
           </p>
 
           <div style={{ fontSize: '26px', margin: '6px 0' }}>
@@ -1450,8 +1450,8 @@ const ARGame = () => {
           }}>
             <model-viewer
   id="ar-end-mv"
-  src="/models/walking_emperor_penguin_chick.glb"
-  ios-src="/models/Walking_Emperor_Penguin_Chick.usdz"
+  src="/models/public/models/family.glb"
+  ios-src="/models/public/models/family.usdz"
   ar
   ar-modes="webxr scene-viewer quick-look"
   ar-placement="floor"
@@ -1536,7 +1536,7 @@ const ARGame = () => {
             {gameTime === 0
               ? 'The 3-minute rescue window expired!'
               : failFrom === 'quiz'
-                ? 'The quiz attempt failed. Try Stage 2 again and help ICY&apos;S BABY finish the rescue!'
+                ? 'The quiz attempt failed. Try Stage 2 again and help ICYS BABY finish the rescue!'
                 : 'The sea lion caught ICY before it could reach its parents...'}
           </p>
 
