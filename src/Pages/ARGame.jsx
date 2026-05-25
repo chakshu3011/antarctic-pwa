@@ -1450,8 +1450,8 @@ const ARGame = () => {
           }}>
             <model-viewer
   id="ar-end-mv"
-  src="/models/public/models/family.glb"
-  ios-src="/models/public/models/family.usdz"
+  src="models/family.glb"
+  ios-src="/models/family.usdz"
   ar
   ar-modes="webxr scene-viewer quick-look"
   ar-placement="floor"
